@@ -1,0 +1,125 @@
+{% extends 'admin/extn.html' %} 
+{% load static %}
+{% block content %}
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4 text-center" style="color: #ffffff; background: linear-gradient(90deg, #4a90e2, #5cc4c4); padding: 15px; border-radius: 10px;">
+            <span class="text-light fw-light">Manage Stock Manager /</span> Add Stock Manager
+        </h4>
+        <!-- Basic Layout -->
+        <div class="row justify-content-center">
+            <div class="col-xxl" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 15px; padding: 40px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
+                <div class="card mb-4 border-0">
+                    <div class="card-body">
+                        {% for msg in messages %}
+                        <h6 class="text-center text-danger py-2 mb-3" style="background-color: #ffe5e5; border-radius: 10px;">{{msg}}</h6>
+                        {% endfor %}
+                        <form method="POST" enctype="multipart/form-data" id="emailForm">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label  class="form-label" for="username" style="font-weight: bold;">User Name</label>
+                                <input  type="text" class="form-control" id="username" placeholder="User Name" name="username" value="{{username}}" required style="border: 1px solid #4a90e2; border-radius: 4px;"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="name" style="font-weight: bold;">Boys Name</label>
+                                <input type="text" class="form-control" id="name" placeholder="Enter Boys Name" name="name" value="{{name}}" required style="border: 1px solid #4a90e2; border-radius: 4px;"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="phone" style="font-weight: bold;">Phone No</label>
+                                <input type="tel" class="form-control" id="phone" placeholder="Enter Phone No" name="phone" pattern="[0-9]{10}" minlength="10" maxlength="10" value="{{phone}}" required style="border: 1px solid #466e59; border-radius: 4px;"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="email" style="font-weight: bold;">Email Id</label>
+                                <input type="email" id="email" class="form-control" placeholder="Enter Email Id" name="email" value="{{email}}" required style="border: 1px solid #4a90e2; border-radius: 4px;"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="role" style="font-weight: bold;">Role</label>
+                                <input type="text" class="form-control" id="role" placeholder="Enter Role" name="Role" value="{{role}}" required style="border: 1px solid #4a90e2; border-radius: 4px;"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="password" style="font-weight: bold;">Password</label>
+                                <input type="password" class="form-control" id="password" placeholder="Enter Password" name="Password" required style="border: 1px solid #4a90e2; border-radius: 4px;"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="password1" style="font-weight: bold;">Confirm Password</label>
+                                <input type="password" class="form-control" id="password1" placeholder="Enter Confirm Password" name="Password1" required style="border: 1px solid #4a90e2; border-radius: 4px;"/>
+                            </div>
+                            <div class="row justify-content-end">
+                                <div class="col-sm-10">
+                                    <button type="submit" class="btn btn-primary" style="background-color: #4a90e2; border: none; border-radius: 5px;">Add</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4 text-center" style="color: #ffffff; background: linear-gradient(90deg, #4a90e2, #5cc4c4); padding: 15px; border-radius: 10px;">
+            <span class="text-light fw-light">Manage Stock Manager /</span> View Stock Manager
+        </h4>
+        <!-- Basic Bootstrap Table -->
+        <div class="card">
+            <div class="table-responsive text-nowrap">
+                {% for msg in messages %}
+                <h6 style="color: red; text-align: center; padding: 10px; border-radius: 10px; background-color: #ffe5e5; margin-bottom: 15px;">{{msg}}</h6>
+                {% endfor %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #4a90e2;">User Name</th>
+                            <th style="background-color: #4a90e2;">Boys Name</th>
+                            <th style="background-color: #4a90e2;">Mobile</th>  
+                            <th style="background-color: #4a90e2;">Email</th>                  
+                            <th style="background-color: #4a90e2;">Role</th>
+                            <th style="background-color: #4a90e2;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for i in boy %}
+                        <tr>
+                            <td><strong>{{i.username}}</strong></td>
+                            <td>{{i.name}}</td>
+                            <td>{{i.mobile}}</td>
+                            <td>{{i.email}}</td>
+                            <td>{{i.role}}</td>
+                            <td>
+                                <a href="{% url 'update_user' i.id %}" class="btn btn-success">Edit</a>
+                                <a href="{% url 'delete_boy' i.pk %}" class="btn btn-danger" style="background-color: red;">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %} 
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- / Content -->
+
+<script>
+    // JavaScript validation for phone number
+    document.getElementById('phone').addEventListener('input', function (e) {
+        var phone = e.target.value;
+        if (!/^\d{10}$/.test(phone)) {
+            e.target.setCustomValidity('Phone number must be 10 digits.');
+        } else {
+            e.target.setCustomValidity('');
+        }
+    });
+    document.getElementById('email').addEventListener('input', function (e) {
+        var email = e.target.value;
+        var emailPattern = /^[a-zA-Z0-9._-]+@[a-z0-9.-]+\.[a-z]{2,}$/; // Your email validation pattern
+
+        if (!emailPattern.test(email)) {
+            e.target.setCustomValidity('Please enter a valid email address with lowercase letters after @.');
+        } else {
+            e.target.setCustomValidity('');
+        }
+    });
+</script>
+{% endblock %}
