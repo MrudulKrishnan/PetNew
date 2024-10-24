@@ -62,7 +62,7 @@
 
 <div class="update-container">
     <h1>Update Delivery Status</h1>
-    <form method="POST" action="{% url 'update_order_status' order.id %}">
+    <form method="POST" action="{% url 'update_order_status'  %}">
         {% csrf_token %}
         <label for="status">Delivery Status:</label>
         <select id="status" name="status">

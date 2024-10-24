@@ -1,4 +1,5 @@
 from datetime import datetime
+import random
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from .models import *
@@ -172,7 +173,7 @@ def boy_register(request):
                 'phone':phone,
                 'role':Role,
                 
-                
+ 
             })
     
     else:
@@ -251,9 +252,11 @@ def cus_register(request):
                     is_customer=True,
                 )
                 user.save()
+                u_id = user.id 
+                print("&&&&&&&&&&&&&&&&&&&&",u_id)
+                request.session['u_id'] = u_id
                 # Add a success message
-                messages.success(request, 'Registration successful.')
-                return redirect('cus_login')
+                return redirect('generate_account_details')
         else:
             messages.error(request, 'password not matching.')
             return render(request, 'user/register.html', {
@@ -672,11 +675,109 @@ def pet_booking(request, pet_id):
     print("&&&&&&&&&&&&&&&&&&&&", pet_obj)
     return render(request, "user/pet_booking.html", {'pet': pet_obj})
 
+def manage_booking(request):
+    booking_details = BookingDetails.objects.all()
+    return render(request, "administrator/manage_booking.html", {'bookings': booking_details})
+
+def cancel_booking(request, booking_id):
+    booking_obj = BookingDetails.objects.get(id=booking_id)
+    booking_obj.Status = "cancelled"
+    booking_obj.save()
+    return HttpResponse('''<script>alert("Cancelled"); window.location="/manage_booking"</script>''')
+
+
+def assign_booking(request, booking_id):
+    booking_obj = BookingDetails.objects.get(id=booking_id)
+    request.session['booking_id'] = booking_id
+    boy = User.objects.filter(is_boy=True)
+    return render(request, "administrator/assign_delivery.html", {'booking': booking_obj, 'delivery_boys': boy})
+
+
+def assign_delivery(request):
+    boy_id = request.POST['delivery_boy']
+    booking_id = request.POST['booking_id']
+    booking_obj = BookingDetails.objects.get(id=booking_id)
+    booking_obj.Status = "Assigned"
+    booking_obj.save()
+    asssign_obj = AssignTable()
+    asssign_obj.BOY = User.objects.get(id=boy_id)
+    asssign_obj.BOOKING = BookingDetails.objects.get(id=booking_id)
+    asssign_obj.Status = "Assigned"
+    asssign_obj.Comments = "Nill"
+    asssign_obj.save()
+    return HttpResponse('''<script>alert("Assigned"); window.location="/manage_booking"</script>''')
+
+
+
+# ////////////////////////////////////// delivery boy ///////////////////////////////////////
+
+
+def deliveryboy_home(request):
+    return render(request, "deliveryboy/home.html")
+
+def view_order(request):
+    obj = AssignTable.objects.all()
+    return render(request, "deliveryboy/view_order.html",{'orders': obj})
+
+def update_delivery(request, assign_id):
+    request.session['assign_id']=assign_id
+    return render(request, "deliveryboy/update_delivery.html")
+
+def update_order_status(request):
+    status = request.POST['status']
+    delivery_comments = request.POST['delivery_comments']
+    assign_obj = AssignTable.objects.get(id=request.session['assign_id'])
+    assign_obj.Status = status
+    assign_obj.Comments = delivery_comments
+    assign_obj.save()
+    return HttpResponse('''<script>alert("Status updated"); window.location="/view_order"</script>''')
+
+def generate_account_details(request):
+    accntnumber = ""
+    key = ""
+    ifsc = ""
+    list_of_chars = "1234567890"
+    accntnumber_length = 11
+    key_length = 3
+    for i in range(accntnumber_length):
+        accntnumber += random.choice(list_of_chars)
+    for i in range(key_length):
+        key += random.choice(list_of_chars)
+    ifsc = "SBTR000055"
+    amt = "500000"
+    account_details = {
+        'account_number': accntnumber,
+        'key': key,
+        'IFSC': ifsc,
+        'amount': amt,
+    }
+    account_obj = memberaccount()
+    account_obj.member = User.objects.get(id=request.session['u_id'])
+    account_obj.account_number = accntnumber
+    account_obj.key = key
+    account_obj.IFSC = ifsc
+    account_obj.amount = amt
+    account_obj.save()
+    messages.success(request, 'Registration successful.')
+    return HttpResponse('''<script>alert("Registration successful."); window.location="/cus_login"</script>''')
+
+
+def payment_page(request):
+    request.session['total_price'] = request.POST['total_price']
+    request.session['product_id'] = request.POST['product_id']
+    request.session['quantity'] = request.POST['quantity']
+    total = request.POST['total_price']
+    print("^^^^^^^^^^^^^^^6", request.POST)
+    print("$$$$$$$$$$$$$$$", total)
+    account_obj = memberaccount.objects.get(member_id=request.session['user_id'])
+    return render(request, "user/payment.html", {'account_obj': account_obj, 'total': total})
+
+
 def booking(request):
     print("%%%%%%%%%%",request.POST)
     user_lid = request.session['user_id']
-    product_id = request.POST['product_id']
-    quantity = request.POST['quantity']
+    product_id = request.session['product_id']
+    quantity = request.session['quantity']
     print(request.POST, "=================================")
     print(product_id, "PPPPPPPPPPPPPPPPPPPPPPP")
     print(quantity, "qqqqqqqqqqqqqqqqqqqqqqq")
@@ -713,7 +814,7 @@ def booking(request):
             print("%%%%%%%%%%%%%%%%%%%%%$444444444444444")
             obe = BookingTable()
             obe.Total = tt
-            obe.Status = 'booked'
+            obe.Status = 'Paid'
             obe.Date = datetime.now().strftime("%Y-%m-%d")
             obe.USER = User.objects.get(id=user_lid)
             obe.save()
@@ -740,26 +841,42 @@ def booking(request):
         return HttpResponse('''<script>alert("out of stock"); window.location="/cus_home"</script>''')
 
 
-def manage_booking(request):
-    booking_details = BookingDetails.objects.all()
-    return render(request, "administrator/manage_booking.html", {'bookings': booking_details})
+def view_account(request):
+    return render(request, "user/view_account.html")
 
-def cancel_booking(request, booking_id):
-    booking_obj = BookingDetails.objects.get(id=booking_id)
-    booking_obj.Status = "cancelled"
-    booking_obj.save()
-    return HttpResponse('''<script>alert("Cancelled"); window.location="/manage_booking"</script>''')
+def payment(request):
+    user_id = request.session['user_id']
+    accountdetails = memberaccount.objects.filter(member=user_id).first()
+    key1=accountdetails.key
+    amount = request.POST['amount']
+    account_balane=accountdetails.amount
+    if request.method == 'POST':
+        if accountdetails:
+            key=request.POST['key']
+            if key==key1:
+                amount = request.POST['amount']
+                if float(account_balane) >= float(amount):
+                    new_balance = float(account_balane) - float(amount)  # Convert amount to float
+                    accountdetails.amount = new_balance
+                    accountdetails.save()
+                    # Use the correct parameter name when redirecting
+                    return HttpResponse('''<script>alert("Paid successfully."); window.location="/booking"</script>''')
+                else:
+                    return HttpResponse("Insufficient balance")
+            else:
+                    return HttpResponse('''<script>alert("PIN number incorrect"); window.location="/cus_home"</script>''')
+        else:
+            return HttpResponse("Account details not found")    
+    return HttpResponse('''<script>alert("Value error"); window.location="/cus_home"</script>''')
 
 
-# ////////////////////////////////////// delivery boy ///////////////////////////////////////
+def view_payments(request):
+    booking_obj = BookingDetails.objects.filter(BOOK__Status="Paid")
+    print("&&&&&&&&&&&&&&&&", booking_obj)
+    return render(request, "administrator/view_payments.html", {'payments': booking_obj})
 
 
-def deliveryboy_home(request):
-    return render(request, "deliveryboy/home.html")
-
-def view_order(request):
-    obj = AssignTable.objects.all()
-    return render(request, "deliveryboy/view_order.html",{'orders': obj})
-
-def update_delivery(request):
-    return render(request, "deliveryboy/update_delivery.html")
+def view_bookings(request):
+    booking_obj = BookingDetails.objects.filter(BOOK__USER_id=request.session['user_id'])
+    print("^^^^^^^^^^^^^^", booking_obj)
+    return render(request, "user/view_bookings.html",{'bookings': booking_obj })

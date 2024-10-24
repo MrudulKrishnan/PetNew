@@ -87,4 +87,14 @@ class AssignTable(models.Model):
     BOOKING = models.ForeignKey(BookingDetails, on_delete=models.CASCADE)
     Date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     Status = models.CharField(max_length=30, blank=True, null=True)
-      
+    Comments = models.CharField(max_length=500, blank=True, null=True)  
+
+class memberaccount(models.Model):
+    id=models.AutoField(primary_key=True)
+    account_number=models.CharField(max_length=50)
+    IFSC=models.CharField(max_length=50)
+    key=models.CharField(max_length=50)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    member = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    def _str_(self):
+        return str(self.member)

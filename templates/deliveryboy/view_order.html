@@ -87,7 +87,13 @@
                 <td>{{ order.BOOKING.PET.name }}</td>
                 <td>{{ order.BOOKING.Quantity }}</td>
                 <td>${{ order.BOOKING.BOOK.Total }}</td>
+                {% if order.Status == "pending" %}
+                <td>
+                    <a href="/update_delivery/{{ order.id }}">Upadate</a>
+                <td>
+                    {% else %}
                 <td>{{ order.Status }}</td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

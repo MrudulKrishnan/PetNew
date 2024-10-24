@@ -1,7 +1,7 @@
 {% extends 'user/base.html' %}
 {% load static %}
 {% block content %}
-<form method="post" action="/booking/">
+<form method="post" action="/payment_page/">
     {% csrf_token %}
 <div class="cart-container">
     <h1>Booking</h1>
@@ -44,7 +44,8 @@
     <!-- Checkout Section -->
     <div class="checkout-section">
         <input type="submit" value="Book">
-        <p class="total-price">Total: ₹<span id="total-price">{{ pet.price }}</span></p>
+        <p class="total-price">Total: ₹<input type="text" id="total-prices" name="total_price" value="{{ pet.price }}" readonly></p>
+      
     </div>
 
     {% endif %}
@@ -192,14 +193,16 @@
         const decrementBtn = document.getElementById('decrement');
         const quantityInput = document.getElementById('quantity');
         const priceElement = document.getElementById('price');
-        const totalPriceElement = document.getElementById('total-price');
+        const totalPriceInput = document.getElementById('total-prices');
+
 
         let price = parseFloat(priceElement.textContent);
         let quantity = parseInt(quantityInput.value);
+        let totalPriceElements = document.getElementById('total-prices');
         
         function updateTotalPrice() {
             let totalPrice = quantity * price;
-            totalPriceElement.textContent = totalPrice.toFixed(2);
+            totalPriceInput.value = totalPrice.toFixed(2);
         }
 
         incrementBtn.addEventListener('click', function() {

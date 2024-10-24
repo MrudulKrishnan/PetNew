@@ -40,14 +40,25 @@ urlpatterns = [
     path('cart/remove/<int:cart_item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('cart/increment/<int:item_id>/', views.increment_cart_item, name='increment_cart_item'),
     path('cart/decrement/<int:item_id>/', views.decrement_cart_item, name='decrement_cart_item'),
-    path('cart/checkout/', views.checkout_view, name='checkout_view'),   
+    path('cart/checkout/', views.checkout_view, name='checkout_view'),
+       
     path('pet_booking/<int:pet_id>', views.pet_booking, name='pet_booking'),
     path('booking/', views.booking, name='booking'),
     path('manage_booking', views.manage_booking, name="manage_booking"),
     path('cancel_booking/<int:booking_id>', views.cancel_booking, name="cancel_booking"),
     path('deliveryboy_home/', views.deliveryboy_home, name="deliveryboy_home"),
     path('view_order/', views.view_order, name="view_order"),
-    path('update_delivery/<int:assign_id>', views.update_delivery, name="update_delivery"),
+    path('update_delivery/<int:assign_id>/', views.update_delivery, name="update_delivery"),
+    path('update_order_status/', views.update_order_status, name="update_order_status"),
+    path('assign_booking/<int:booking_id>/', views.assign_booking, name="assign_booking"),
+    path('assign_delivery/', views.assign_delivery, name="assign_delivery"),
+    path('generate_account_details/', views.generate_account_details, name="generate_account_details"),
+    path('payment_page/', views.payment_page, name="payment_page"),
+    path('payment/', views.payment, name="payment"),
+    path('view_account/', views.view_account, name="view_account"),
+    path('view_payments/', views.view_payments, name="view_payments"),
+    path('view_bookings/', views.view_bookings, name="view_bookings"),
+
 
 
 
